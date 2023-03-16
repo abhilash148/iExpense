@@ -30,4 +30,12 @@ class Expenses: ObservableObject {
         items = []
     }
     
+    var personalItems: [ExpenseItem] {
+        return items.filter { $0.type == .personal }
+    }
+    
+    var businessItems: [ExpenseItem] {
+        return items.filter { $0.type == .business }
+    }
+    
 }

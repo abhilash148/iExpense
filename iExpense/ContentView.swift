@@ -7,6 +7,11 @@
 
 import SwiftUI
 
+public enum expenseType: Codable {
+    case personal
+    case business
+}
+
 struct ContentView: View {
     
     @StateObject var expenses = Expenses()
@@ -16,19 +21,39 @@ struct ContentView: View {
         
         NavigationView {
             List {
-                ForEach(expenses.items) { item in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(item.name)
-                                .font(.headline)
-                            Text(item.type)
-                                .font(.footnote)
+                if expenses.personalItems.count > 0 {
+                    Section("Personal") {
+                        ForEach(expenses.personalItems) { item in
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(item.name)
+                                        .font(.headline)
+                                }
+                                Spacer()
+                                Text(item.amount, format: .currency(code: "USD"))
+                                    .modifier(PrimaryFont(value: item.amount))
+                            }
                         }
-                        Spacer()
-                        Text(item.amount, format: .currency(code: "USD"))
+                        .onDelete(perform: removeItems)
                     }
                 }
-                .onDelete(perform: removeItems)
+                
+                if expenses.businessItems.count > 0 {
+                    Section("Business") {
+                        ForEach(expenses.businessItems) { item in
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text(item.name)
+                                        .font(.headline)
+                                }
+                                Spacer()
+                                Text(item.amount, format: .currency(code: Locale.current.currencyCode ?? "USD"))
+                                    .modifier(PrimaryFont(value: item.amount))
+                            }
+                        }
+                        .onDelete(perform: removeItems)
+                    }
+                }
             }
             .toolbar(content: {
                 Button {
@@ -54,5 +79,24 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+    }
+}
+
+struct PrimaryFont: ViewModifier {
+    
+    let value: Double
+    
+    func body(content: Content) -> some View {
+        
+        if value < 10 {
+            return content
+                .font(.caption)
+        } else if value < 100 {
+            return content
+                .font(.caption2)
+        } else {
+            return content
+                .font(.footnote)
+        }
     }
 }
